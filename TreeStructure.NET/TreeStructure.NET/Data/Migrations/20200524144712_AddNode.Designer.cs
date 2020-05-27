@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TreeStructure.NET.Data;
 
 namespace TreeStructure.NET.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200524144712_AddNode")]
+    partial class AddNode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -226,13 +228,15 @@ namespace TreeStructure.NET.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("RootId")
+                    b.Property<int?>("RootNodeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("NodeId");
+
+                    b.HasIndex("RootNodeId");
 
                     b.ToTable("Node");
                 });
@@ -286,6 +290,13 @@ namespace TreeStructure.NET.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TreeStructure.NET.Models.Node", b =>
+                {
+                    b.HasOne("TreeStructure.NET.Models.Node", "Root")
+                        .WithMany("Childs")
+                        .HasForeignKey("RootNodeId");
                 });
 #pragma warning restore 612, 618
         }
