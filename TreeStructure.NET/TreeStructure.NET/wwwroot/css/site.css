@@ -1,6 +1,28 @@
 ﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
 
+.bg-dark {
+    background-color: rgb(41, 43, 49);
+    color: white;
+}
+
+.navbar-brand-dark {
+    color: white;
+}
+
+.text-dark {
+    color: #ffffff !important;
+}
+
+a.text-dark:focus, a.text-dark:hover {
+    color: #30772e !important;
+}
+
+.navbar-brand-dark:hover {
+    color: white;
+    text-decoration: none;
+}
+
 a.navbar-brand {
   white-space: normal;
   text-align: center;
@@ -61,6 +83,8 @@ html {
 body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
+  background-color: rgb(41, 43, 49);
+  color: white;
 }
 .footer {
   position: absolute;
@@ -79,7 +103,7 @@ body {
 }
 
 .root-item {
-
+    cursor: pointer;
 }
 
 .childs-list {
@@ -89,10 +113,38 @@ body {
 }
 
 .child-item {
-
+    cursor: pointer;
 }
 
-.arrow::before {
-    display: block;
+.arrow {
+    margin: -2px 10px 2px -19px;
+    border: solid #30772e;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+
+.table {
+    color: #ffffff;
+}
+
+.green-button {
+    margin: 10px;
+    border: none;
+    padding: 4px 16px;
+
+    background-color: #30772e;
+    color: white;
+}
+
+.button-bar {
+    display: flex;
+
+    justify-content: space-between;
+}
+
+.button-group {
 
 }

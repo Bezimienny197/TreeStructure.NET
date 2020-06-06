@@ -19,36 +19,56 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Value)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.NodeId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.NodeId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.NodeId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Value)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.NodeId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.NodeId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.NodeId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+<div class="button-bar">
+    <div class="button-group">
+        <input type="button" value="Rozwiń całe drzewo" id="show-tree-button" class="green-button" />
+        <input type="button" value="Zwiń całe drzewo" id="hide-tree-button" class="green-button" />
+    </div>
+    <div class="button-group">
+        <input type="button" value="Dodaj nowy element" class="green-button" />
+    </div>
+</div>
 <div id="dataTree"></div>
 
 <script type="text/javascript">
-    var nodes = @Html.Raw(ViewBag.Json)
 
-    var dataTree = document.getElementById("dataTree")
-    var treeList = document.createElement("ul")
-    treeList.setAttribute("id", "root")
-    treeList.classList.add("roots-list");
-    dataTree.appendChild(treeList)
+    try {
+        var nodes = @Html.Raw(ViewBag.Json)
 
-    var ctr
-    do {
-        ctr = 0
-        nodes.forEach(addToTree)
-    } while(ctr > 0 && ctr <= nodes.length)
+        NodeList.prototype.forEach = Array.prototype.forEach
+
+        var dataTree = document.getElementById("dataTree")
+        var treeList = document.createElement("ul")
+        treeList.setAttribute("id", "root")
+        treeList.classList.add("roots-list");
+        dataTree.appendChild(treeList)
+
+        document.getElementById("show-tree-button").onclick = function () { showTree(this); };
+        document.getElementById("hide-tree-button").onclick = function () { hideTree(this); };
+
+        var ctr
+        do {
+            ctr = 0
+            nodes.forEach(addToTree)
+        } while (ctr > 0 && ctr <= nodes.length)
+    } catch (e) {
+        console.log(e);
+    }
 
     function addToTree(item, index) {
         // Czy nie jest jeszcze "narysowany"
@@ -67,8 +87,14 @@
                     if (parent != null) {
                         parentList = document.createElement("ul")
                         parentList.setAttribute("id", "list#" + item["RootId"])
-                        parentList.classList.add("childs-list");
-                        parent.classList.add("arrow")
+                        parentList.classList.add("childs-list")
+                        parentList.style.display = "none"
+
+                        arrow = document.createElement("div")
+                        arrow.classList.add("arrow")
+                        parent.insertBefore(arrow, parent.firstChild);
+
+                        parent.onclick = function () { showChildren(this); };
 
                         parent.parentNode.insertBefore(parentList, parent.nextSibling)
                         createChildLi(item, parentList)
@@ -95,6 +121,54 @@
         list.appendChild(li)
         item["isDrowed"] = true
         ctr++
+    }
+
+    function showChildren(element) {
+        element.nextSibling.style.display = "list-item"
+        element.firstChild.style.transform = "rotate(45deg)"
+        element.firstChild.style.webkitTransform = "rotate(45deg)"
+        element.firstChild.style.borderColor = "#808080"
+        element.onclick = function () { hideChildren(this); };
+    }
+
+    function showAllChildren(element) {
+        let childList = element.nextSibling
+
+        if (childList != null && childList.tagName == 'UL') {
+            showChildren(element)
+
+            childList.childNodes.forEach(function (item) {
+                showAllChildren(item)
+            })
+        }
+    }
+
+    function hideChildren(element) {
+        let childList = element.nextSibling
+
+        if (childList != null && childList.tagName == 'UL') {
+            childList.style.display = "none"
+            element.firstChild.style.transform = "rotate(-45deg)"
+            element.firstChild.style.webkitTransform = "rotate(-45deg)"
+            element.firstChild.style.borderColor = "#30772e"
+            element.onclick = function () { showChildren(this); };
+
+            childList.childNodes.forEach(function (item) {
+                hideChildren(item)
+            })
+        }
+    }
+
+    function showTree() {
+        treeList.childNodes.forEach(function (item) {
+            showAllChildren(item)
+        })
+    }
+
+    function hideTree() {
+        treeList.childNodes.forEach(function (item) {
+            hideChildren(item)
+        })
     }
 
 </script>
