@@ -1,0 +1,236 @@
+﻿@model IEnumerable<TreeStructure.NET.Models.Node>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Struktura drzewiasta:</h1>
+
+<div class="button-bar">
+    <div class="button-group">
+        <input type="button" value="Rozwiń całe drzewo" id="show-tree-button" class="green-button" />
+        <input type="button" value="Zwiń całe drzewo" id="hide-tree-button" class="green-button" />
+    </div>
+    <div class="button-group">
+        <a href="/Tree/Create" class="link-button"><input type="button" value="Dodaj nowy element" class="green-button" /></a>
+    </div>
+</div>
+<div id="dataTree"></div>
+
+<script type="text/javascript">
+
+    try {
+        var nodes = @Html.Raw(ViewBag.Json)
+
+        NodeList.prototype.forEach = Array.prototype.forEach
+
+        var dataTree = document.getElementById("dataTree")
+        var treeList = document.createElement("ul")
+        treeList.setAttribute("id", "root")
+        treeList.classList.add("roots-list");
+        dataTree.appendChild(treeList)
+
+        document.getElementById("show-tree-button").onclick = function () { showTree(this); };
+        document.getElementById("hide-tree-button").onclick = function () { hideTree(this); };
+
+        var ctr
+        do {
+            ctr = 0
+            nodes.forEach(addToTree)
+        } while (ctr > 0 && ctr <= nodes.length)
+    } catch (e) {
+        console.log(e);
+    }
+
+    function addToTree(item, index) {
+        // Czy nie jest jeszcze "narysowany"
+        if (item["isDrowed"] == undefined) {
+            // Czy item posiada węzeł nadrzędny, jeśli nie, dodaj do głównej listy
+            if (item["RootId"] == null) {
+                createRootLi(item, treeList)
+            } else {
+                let parentList = document.getElementById("list#" + item["RootId"])
+                // Sprawdź, czy istnieje już lista węzła nadrzędnego
+                if (parentList != null) {
+                    createChildLi(item, parentList)
+                } else {
+                    let parent = document.getElementById("node#" + item["RootId"])
+                    // Sprawdź, czy został już dodany węzeł nadrzędny
+                    if (parent != null) {
+                        parentList = document.createElement("ul")
+                        parentList.setAttribute("id", "list#" + item["RootId"])
+                        parentList.classList.add("childs-list")
+                        parentList.style.display = "none"
+
+                        arrow = document.createElement("div")
+                        arrow.classList.add("arrow")
+                        parent.insertBefore(arrow, parent.firstChild);
+
+                        parent.firstChild.onclick = function () { showChildren(this.parentElement); };
+
+                        parent.parentNode.insertBefore(parentList, parent.nextSibling)
+                        createChildLi(item, parentList)
+                    }
+                }
+            }
+        }
+    }
+
+    function createChildLi(item, list) {
+        createLi(item, list, "child-item")
+    }
+
+    function createRootLi(item, list) {
+        createLi(item, list, "root-item")
+    }
+
+    function createLi(item, list, cssClass) {
+        let li = document.createElement("li")
+        li.appendChild(document.createTextNode(item["Value"]))
+        li.setAttribute("id", "node#" + item["NodeId"])
+        li.classList.add("tree-item");
+        li.classList.add(cssClass);
+
+        createNodeOptions(item, li)
+
+        li.draggable = "true"
+
+        li.ondragstart = function () {
+            drag(event)
+        }
+
+        li.ondrop = function () {
+            drop(event)
+        }
+
+        li.ondragover = function () {
+            allowDrop(event)
+        }
+
+        list.appendChild(li)
+        item["isDrowed"] = true
+        ctr++
+    }
+
+    function createNodeOptions(item, element) {
+        let links = document.createElement("span")
+        links.classList.add("node-links-list")
+
+        let createLink = document.createElement("a")
+        createLink.setAttribute("href", "/Tree/Create/" + item["NodeId"])
+        createLink.appendChild(document.createTextNode("Dodaj nowy"))
+        createLink.classList.add("node-link")
+        links.appendChild(createLink)
+
+        let editLink = document.createElement("a")
+        editLink.setAttribute("href", "/Tree/Edit/" + item["NodeId"])
+        editLink.appendChild(document.createTextNode("Edytuj"))
+        editLink.classList.add("node-link")
+        links.appendChild(editLink)
+
+        let deleteLink = document.createElement("a")
+        deleteLink.setAttribute("href", "/Tree/Delete/" + item["NodeId"])
+        deleteLink.appendChild(document.createTextNode("Usuń"))
+        deleteLink.classList.add("node-link")
+        links.appendChild(deleteLink)
+
+        element.appendChild(links)
+    }
+
+    function showChildren(element) {
+        element.nextSibling.style.display = "list-item"
+        element.firstChild.style.transform = "rotate(45deg)"
+        element.firstChild.style.webkitTransform = "rotate(45deg)"
+        element.firstChild.style.borderColor = "#808080"
+        element.firstChild.onclick = function () { hideChildren(this.parentElement); };
+    }
+
+    function showAllChildren(element) {
+        let childList = element.nextSibling
+
+        if (childList != null && childList.tagName == 'UL') {
+            showChildren(element)
+
+            childList.childNodes.forEach(function (item) {
+                showAllChildren(item)
+            })
+        }
+    }
+
+    function hideChildren(element) {
+        let childList = element.nextSibling
+
+        if (childList != null && childList.tagName == 'UL') {
+            childList.style.display = "none"
+            element.firstChild.style.transform = "rotate(-45deg)"
+            element.firstChild.style.webkitTransform = "rotate(-45deg)"
+            element.firstChild.style.borderColor = "#30772e"
+            element.firstChild.onclick = function () { showChildren(this.parentElement); };
+
+            childList.childNodes.forEach(function (item) {
+                hideChildren(item)
+            })
+        }
+    }
+
+    function showTree() {
+        treeList.childNodes.forEach(function (item) {
+            showAllChildren(item)
+        })
+    }
+
+    function hideTree() {
+        treeList.childNodes.forEach(function (item) {
+            hideChildren(item)
+        })
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        hideChildren(ev.target)
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+
+        let element = document.getElementById(data)
+
+        let indexOfId = data.indexOf("#") + 1
+        let lengthOfId = data.length - indexOfId
+
+        let nodeId = data.substr(indexOfId, lengthOfId)
+        let rootId = ev.target.id.substr((data.indexOf("#") + 1), (data.length - data.indexOf("#") - 1))
+
+        let value
+
+        if (element.firstChild.tagName != "DIV") {
+            value = element.firstChild.textContent
+        } else {
+            value = element.firstChild.nextSibling.textContent
+        }
+        
+        console.log(nodeId)
+        console.log(value)
+        console.log(rootId)
+
+        let http = new XMLHttpRequest();
+        let url = '/Tree/Edit/' + nodeId;
+        let params = 'NodeId=' + nodeId + '&RootId=' + rootId + '&Value=' + value;
+        http.open('POST', url, true);
+        console.log(params)
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+        http.onreadystatechange = function () {
+            if (http.readyState == 4 && http.status == 200) {
+                location.reload()
+            }
+        }
+        http.send(params);
+    }
+
+</script>

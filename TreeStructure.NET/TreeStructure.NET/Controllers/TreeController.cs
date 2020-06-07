@@ -11,16 +11,16 @@ using TreeStructure.NET.Models;
 
 namespace TreeStructure.NET.Controllers
 {
-    public class NodesController : Controller
+    public class TreeController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public NodesController(ApplicationDbContext context)
+        public TreeController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Nodes
+        // GET: Tree
         public async Task<IActionResult> Index()
         {
             var nodes = await _context.Node.ToListAsync();
@@ -29,7 +29,7 @@ namespace TreeStructure.NET.Controllers
             return View(await _context.Node.ToListAsync());
         }
 
-        // GET: Nodes/Details/5
+        // GET: Tree/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -44,22 +44,26 @@ namespace TreeStructure.NET.Controllers
                 return NotFound();
             }
 
-            ViewBag.Json = JsonSerializer.Serialize(node);
             return View(node);
         }
 
-        // GET: Nodes/Create
-        public IActionResult Create()
+        // GET: Tree/Create
+        public IActionResult Create(int? id)
         {
-            return View();
+            Node node = new Node
+            {
+                RootId = id
+            };
+
+            return View(node);
         }
 
-        // POST: Nodes/Create
+        // POST: Tree/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NodeId,Value")] Node node)
+        public async Task<IActionResult> Create([Bind("NodeId,RootId,Value")] Node node)
         {
             if (ModelState.IsValid)
             {
@@ -70,7 +74,7 @@ namespace TreeStructure.NET.Controllers
             return View(node);
         }
 
-        // GET: Nodes/Edit/5
+        // GET: Tree/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,12 +90,11 @@ namespace TreeStructure.NET.Controllers
             return View(node);
         }
 
-        // POST: Nodes/Edit/5
+        // POST: Tree/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NodeId,Value")] Node node)
+        public async Task<IActionResult> Edit(int id, [Bind("NodeId,RootId,Value")] Node node)
         {
             if (id != node.NodeId)
             {
@@ -121,7 +124,7 @@ namespace TreeStructure.NET.Controllers
             return View(node);
         }
 
-        // GET: Nodes/Delete/5
+        // GET: Tree/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -139,7 +142,7 @@ namespace TreeStructure.NET.Controllers
             return View(node);
         }
 
-        // POST: Nodes/Delete/5
+        // POST: Tree/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
