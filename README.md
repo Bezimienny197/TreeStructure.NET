@@ -31,4 +31,12 @@ In Visual Studio, from the Debug menu, choose Run without debug (or press Ctrl +
 
 ## Example
 ![Example 1](docs/imgs/Example-1.png)  
-![Example 2](docs/imgs/Example-2.png)
+![Example 2](docs/imgs/Example-2.png)  
+![Example 3](docs/imgs/Example-3.png)  
+![Example 4](docs/imgs/Example-4.png)  
+![Example 5](docs/imgs/Example-5.png)  
+![Example 6](docs/imgs/Example-6.png)  
+![Example 7](docs/imgs/Example-7.png)  
+![Example 8](docs/imgs/Example-8.png)  
+![Example 9](docs/imgs/Example-9.png)  
+![Example 10](docs/imgs/Example-10.png)
